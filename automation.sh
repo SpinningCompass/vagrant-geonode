@@ -221,6 +221,8 @@ echo "from maploom.geonode.urls import urlpatterns as maploom_urls
 # After the section where urlpatterns is declared
 urlpatterns += maploom_urls" >> geonode/geonode/urls.py
 
+sudo cp /install/hosts /etc/hosts
+
 # Configure PostGIS as the GeoNode backend
 cd geonode
 pip install psycopg2
@@ -228,8 +230,16 @@ python manage.py syncdb --noinput
 python manage.py createsuperuser --username=admin --email=ad@m.in --noinput
 python manage.py collectstatic --noinput
 
-# Start GeoServer and Django for GeoNode
-paver start -b 0.0.0.0:8000
+
+
+sudo a2enmod proxy
+sudo a2enmod proxy_http
+sudo cp /install/apache/geonode.conf /etc/apache2/sites-available/geonode.conf
+sudo a2ensite geonode
+sudo service apache2 restart
+
+cp /install/geoserver/web.xml /install/portal/geonode/geoserver/geoserver/WEB-INF/web.xml
+cp /install/geoserver/config.xml /install/portal/geonode/geoserver/data/security/auth/geonodeAuthProvider/config.xml
 
 echo
 echo "A new admin user account has been created but requires a password to be used on the website."

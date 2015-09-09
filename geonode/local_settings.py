@@ -26,7 +26,7 @@ OGC_SERVER = {
     'default' : {
         'BACKEND' : 'geonode.geoserver',
         'LOCATION' : 'http://localhost:8080/geoserver/',
-        'PUBLIC_LOCATION' : 'http://localhost:8080/geoserver/',
+        'PUBLIC_LOCATION' : 'http://geonode.vag/geoserver/',
         'USER' : 'admin',
         'PASSWORD' : 'geoserver',
         'MAPFISH_PRINT_ENABLED' : True,
@@ -38,7 +38,7 @@ OGC_SERVER = {
         'WPS_ENABLED' : False,
         'LOG_FILE': '%s/geoserver/data/logs/geoserver.log' % os.path.abspath(os.path.join(PROJECT_ROOT, os.pardir)),
         # Set to name of database in DATABASES dictionary to enable
-        'DATASTORE': '', #'datastore',
+        'DATASTORE': 'datastore', #'datastore',
     }
 }
 
@@ -68,7 +68,7 @@ CATALOGUE = {
 # Default preview library
 #LAYER_PREVIEW_LIBRARY = 'geoext'
 
-ALLOWED_HOST = ['localhost']
+ALLOWED_HOST = ['localhost', 'geonode.vag']
 
 # turn off social buttons
 SOCIAL_BUTTONS = False
@@ -90,7 +90,7 @@ UPLOADER = {
 
 
 # The FULLY QUALIFIED url to the GeoServer instance for this GeoNode.
-GEOSERVER_BASE_URL = 'http://localhost:8080/geoserver/'
+GEOSERVER_BASE_URL = 'http://geonode.vag/geoserver/'
 
 MAP_BASELAYERS = [{
     "source": {
