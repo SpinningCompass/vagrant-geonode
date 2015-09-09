@@ -81,10 +81,28 @@ sudo npm install -y -g grunt-cli
 # Ensure that the INSTALL_DIR is created and owned by the user running the script
 sudo mkdir -p $INSTALL_DIR
 sudo chown $USER $INSTALL_DIR
+
+#install geogig and setup
+if [ ! -d "/opt/geogig" ]; then
+  cd ~
+  wget "http://iweb.dl.sourceforge.net/project/geogig/geogig-1.0-beta1/geogig-cli-app-1.0-beta1.zip"
+  sudo unzip geogig-cli-app-1.0-beta1.zip -d /opt/geogig
+  /opt/geogig/bin/geogig config --global user.name "vagrant"
+  /opt/geogig/bin/geogig config --global user.email "vagrant@localhost"
+fi
+
 cd $INSTALL_DIR
 
-# GeoNode GitHub repo
-git clone https://github.com/ua-snap/geonode.git
+if [ ! -d "geonode" ]; then
+  git clone https://github.com/geonode/geonode.git
+fi
+
+if [ -d "geonode" ]; then
+  cd geonode
+  git pull origin master
+  cd $INSTALL_DIR
+fi
+
 
 # Create geonode user and databases in PSQL
 sudo -u postgres psql -c "CREATE USER geonode WITH PASSWORD 'geonode'"
@@ -112,6 +130,8 @@ echo "export WORKON_HOME=~/.venvs" >> ~/.bashrc
 echo "source /usr/local/bin/virtualenvwrapper.sh" >> ~/.bashrc
 echo "export PIP_DOWNLOAD_CACHE=$HOME/.pip-downloads" >> ~/.bashrc
 echo "export INSTALL_DIR=$INSTALL_DIR" >> ~/.bashrc
+echo "export INSTALL_DIR=$INSTALL_DIR" >> ~/.bashrc
+echo "export PATH=/opt/geogig/bin:$PATH" >> ~/.bashrc
 
 # Sourcing these from the BASHRC was not working in the script. Explicitly,
 # setting these from the BASHRC for immediate usage.
@@ -154,10 +174,12 @@ rm GDAL-1.10.0.tar.gz
 sed -e "s/-Xmx512m/-Xmx4096m/" < geonode/pavement.py > geonode/pavement2.py
 mv geonode/pavement2.py geonode/pavement.py
 
+
 # Run paver setup and paver sync to get the paver start / stop commands for the 
 # GeoNode and GeoServer tools.
 cd geonode
-paver setup
+
+paver setup_geoserver 
 paver sync
 
 # Turn of Tomcat since it is unnecessary for running GeoNode / GeoServer
@@ -166,28 +188,30 @@ sudo update-rc.d tomcat7 disable
 
 # Clone and install the django-maploom Python package
 cd ..
-git clone https://github.com/ROGUE-JCTD/django-maploom.git
-pip install -e django-maploom
+if [ ! -d "django-maploom" ]; then
+  git clone https://github.com/ROGUE-JCTD/django-maploom.git
+  pip install -e django-maploom
+fi
 
 # Chown the .npm directory to the user currently running this script
 sudo chown -R $USER ~/.npm/
 
-# Clone and make the MapLoom JS file from our local fork of the MapLoom repository
-git clone https://github.com/ua-snap/MapLoom.git
-cd MapLoom
-npm install && bower install && grunt
-cp -f bin/assets/MapLoom-1.2.0.js ../django-maploom/maploom/static/maploom/assets/MapLoom-1.2.js
-cd ..
+# # Clone and make the MapLoom JS file from our local fork of the MapLoom repository
+# git clone https://github.com/ua-snap/MapLoom.git
+# cd MapLoom
+# npm install && bower install && grunt
+# cp -f bin/assets/MapLoom-1.2.0.js ../django-maploom/maploom/static/maploom/assets/MapLoom-1.2.js
+# cd ..
 
-# Clone and install the SNAP Arctic Portal Git Repository
-git clone https://github.com/ua-snap/snap-arctic-portal.git
-cd snap-arctic-portal
-git checkout snapmapapp
-cd ..
-pip install -e snap-arctic-portal
+# # Clone and install the SNAP Arctic Portal Git Repository
+# git clone https://github.com/ua-snap/snap-arctic-portal.git
+# cd snap-arctic-portal
+# git checkout snapmapapp
+# cd ..
+# pip install -e snap-arctic-portal
 
 # Add maploom and snapmapapp as GeoNode apps to settings.py
-sed -e "s/) + GEONODE_APPS/'maploom',\n'snapmapapp',\n) + GEONODE_APPS/" < geonode/geonode/settings.py > geonode/geonode/settings2.py
+sed -e "s/) + GEONODE_APPS/'maploom',\n'geonode.contrib.geogig',\n) + GEONODE_APPS/" < geonode/geonode/settings.py > geonode/geonode/settings2.py
 mv geonode/geonode/settings2.py geonode/geonode/settings.py
 
 # Add the maploom_urls to the list of urlpatterns in urls.py
@@ -195,11 +219,7 @@ mv geonode/geonode/settings2.py geonode/geonode/settings.py
 echo "from maploom.geonode.urls import urlpatterns as maploom_urls
 
 # After the section where urlpatterns is declared
-urlpatterns += maploom_urls
-
-from snapmapapp.urls import urlpatterns as snapmapapp_urls
-tmp_urlpatterns = snapmapapp_urls + urlpatterns
-urlpatterns = tmp_urlpatterns" >> geonode/geonode/urls.py
+urlpatterns += maploom_urls" >> geonode/geonode/urls.py
 
 # Configure PostGIS as the GeoNode backend
 cd geonode
@@ -209,7 +229,7 @@ python manage.py createsuperuser --username=admin --email=ad@m.in --noinput
 python manage.py collectstatic --noinput
 
 # Start GeoServer and Django for GeoNode
-paver start_geoserver && paver start_django -b 0.0.0.0:8000
+paver start -b 0.0.0.0:8000
 
 echo
 echo "A new admin user account has been created but requires a password to be used on the website."

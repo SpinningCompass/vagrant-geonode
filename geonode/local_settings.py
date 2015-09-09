@@ -32,7 +32,7 @@ OGC_SERVER = {
         'MAPFISH_PRINT_ENABLED' : True,
         'PRINT_NG_ENABLED' : True,
         'GEONODE_SECURITY_ENABLED' : True,
-        'GEOGIG_ENABLED' : False,
+        'GEOGIG_ENABLED' : True,
         'WMST_ENABLED' : False,
         'BACKEND_WRITE_ENABLED': True,
         'WPS_ENABLED' : False,
@@ -69,3 +69,67 @@ CATALOGUE = {
 #LAYER_PREVIEW_LIBRARY = 'geoext'
 
 ALLOWED_HOST = ['localhost']
+
+# turn off social buttons
+SOCIAL_BUTTONS = False
+
+
+GEOGIG_DATASTORE_NAME = "geogigstore"
+
+UPLOADER = {
+    'BACKEND': 'geonode.importer',
+    'OPTIONS': {
+        'TIME_ENABLED': False,
+        'GEOGIG_ENABLED': True,
+    }
+}
+
+
+
+
+
+
+# The FULLY QUALIFIED url to the GeoServer instance for this GeoNode.
+GEOSERVER_BASE_URL = 'http://localhost:8080/geoserver/'
+
+MAP_BASELAYERS = [{
+    "source": {
+        "ptype": "gxp_wmscsource",
+        "url": GEOSERVER_BASE_URL + "wms",
+        "restUrl": "/gs/rest"
+     }
+  },{
+    "source": {"ptype": "gxp_olsource"},
+    "type":"OpenLayers.Layer",
+    "args":["No background"],
+    "visibility": False,
+    "fixed": True,
+    "group":"background"
+  }, {
+    "source": {"ptype": "gxp_olsource"},
+    "type":"OpenLayers.Layer.OSM",
+    "args":["OpenStreetMap"],
+    "visibility": False,
+    "fixed": True,
+    "group":"background"
+  }, {
+    "source": {"ptype": "gxp_mapquestsource"},
+    "name":"osm",
+    "group":"background",
+    "visibility": True
+  }, {
+    "source": {"ptype": "gxp_mapquestsource"},
+    "name":"naip",
+    "group":"background",
+    "visibility": False
+  }, {
+    "source": {"ptype": "gxp_bingsource"},
+    "name": "AerialWithLabels",
+    "fixed": True,
+    "visibility": False,
+    "group":"background"
+  },{
+    "source": {"ptype": "gxp_mapboxsource"},
+  }
+]
+
