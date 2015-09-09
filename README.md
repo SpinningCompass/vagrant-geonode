@@ -1,4 +1,4 @@
-# SNAP GeoNode
+# GeoNode Vagrant Install
 
 This repo contains notes and utilities for setting up GeoNode for our development environment.
 
