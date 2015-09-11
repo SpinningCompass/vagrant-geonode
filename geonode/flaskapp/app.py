@@ -16,18 +16,15 @@ def index(searchstr = None):
          }
 
 
-    results = db.session.execute("""SELECT \
-                          ST_AsGeoJSON("TM_WORLD_BORDERS_SIMPL_0.35".the_geom) as geom, \
-                          "TM_WORLD_BORDERS_SIMPL_0.35"."ISO2" as iso2, \
-                          "TM_WORLD_BORDERS_SIMPL_0.35"."NAME" as name\
-                        FROM \
-                          public."TM_WORLD_BORDERS_SIMPL_0.35";""")
+    results = db.session.execute("""SELECT 
+                          ST_AsGeoJSON(ST_Multi(ST_Union("TM_WORLD_BORDERS_SIMPL_0.35".the_geom))) as geom
+                        FROM 
+                          public."TM_WORLD_BORDERS_SIMPL_0.35"
+                        GROUP BY "TM_WORLD_BORDERS_SIMPL_0.35"."REGION";""")
     for row in results:
         tempfeature = { "type": "Feature",
             "geometry": json.loads(row['geom']),
             "properties": {
-                        "iso2": row['iso2'],
-                        "name": row['name']
                     }
             }
         geojsonschema['features'].append(tempfeature)
