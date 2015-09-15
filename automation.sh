@@ -72,7 +72,8 @@ sudo apt-get install -y            \
     unzip                          \
     vim                            \
     zip                            \
-    zlib1g-dev
+    zlib1g-dev                      \
+    supervisor 
 
 sudo pip install virtualenvwrapper
 sudo npm install -y -g bower
@@ -229,6 +230,10 @@ pip install psycopg2
 python manage.py syncdb --noinput
 python manage.py createsuperuser --username=admin --email=ad@m.in --noinput
 python manage.py collectstatic --noinput
+
+
+sudo cp -R /install/supervisor-app.conf /etc/supervisor/conf.d/supervisor-app.conf
+sudo service supervisor start
 
 
 
