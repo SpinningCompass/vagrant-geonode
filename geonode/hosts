@@ -1,6 +1,7 @@
 127.0.0.1       localhost
 127.0.1.1       localhost.vm    localhost
-192.168.33.100  geonode.vag
+192.168.33.101  geonode1.vag
+192.168.33.102  geonode2.vag
 
 # The following lines are desirable for IPv6 capable hosts
 ::1     localhost ip6-localhost ip6-loopback
