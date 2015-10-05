@@ -1,7 +1,7 @@
 import os
 from settings import PROJECT_ROOT
 
-SITEURL = "http://localhost:8000/"
+SITEURL = "http://geonode.vag/"
 
 DATABASES = {
     'default': {

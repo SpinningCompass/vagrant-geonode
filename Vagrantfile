@@ -12,16 +12,16 @@ Vagrant.configure(2) do |config|
   config.vm.define :geonode1 do |geonode1|
     geonode1.vm.box = "puppetlabs/ubuntu-14.04-64-puppet"
 
-    geonode1.vm.network "forwarded_port", guest: 80, host: 28888
-    geonode1.vm.network "forwarded_port", guest: 8000, host: 28000
-    geonode1.vm.network "forwarded_port", guest: 8080, host: 28080
-    geonode1.vm.network "forwarded_port", guest: 5432, host: 25432
-    geonode1.vm.network "private_network", ip: "192.168.33.102"
+    geonode1.vm.network "forwarded_port", guest: 80, host: 18888
+    geonode1.vm.network "forwarded_port", guest: 8000, host: 18000
+    geonode1.vm.network "forwarded_port", guest: 8080, host: 18080
+    geonode1.vm.network "forwarded_port", guest: 5432, host: 15432
+    geonode1.vm.network "private_network", ip: "192.168.33.101"
 
     geonode1.vm.synced_folder "geonode", "/install"
 
 
-    geonode1.vm.provision "shell", path: "automation.sh", privileged: false
+    geonode1.vm.provision "shell", path: "automation.sh", privileged: false, :args => "geonode1.vag"
 
     geonode1.vm.provider "virtualbox" do |vb|
       vb.memory = "3192"
@@ -32,16 +32,16 @@ Vagrant.configure(2) do |config|
   config.vm.define :geonode2 do |geonode2|
     geonode2.vm.box = "puppetlabs/ubuntu-14.04-64-puppet"
 
-    geonode2.vm.network "forwarded_port", guest: 80, host: 18888
-    geonode2.vm.network "forwarded_port", guest: 8000, host: 18000
-    geonode2.vm.network "forwarded_port", guest: 8080, host: 18080
-    geonode2.vm.network "forwarded_port", guest: 5432, host: 15432
-    geonode2.vm.network "private_network", ip: "192.168.33.101"
+    geonode2.vm.network "forwarded_port", guest: 80, host: 28888
+    geonode2.vm.network "forwarded_port", guest: 8000, host: 28000
+    geonode2.vm.network "forwarded_port", guest: 8080, host: 28080
+    geonode2.vm.network "forwarded_port", guest: 5432, host: 25432
+    geonode2.vm.network "private_network", ip: "192.168.33.102"
 
     geonode2.vm.synced_folder "geonode", "/install"
 
 
-    geonode2.vm.provision "shell", path: "automation.sh", privileged: false
+    geonode2.vm.provision "shell", path: "automation.sh", privileged: false, :args => "geonode2.vag"
 
     geonode2.vm.provider "virtualbox" do |vb|
       vb.memory = "3192"

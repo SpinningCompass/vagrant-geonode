@@ -48,7 +48,7 @@
 
     <context-param>
        <param-name>GEOSERVER_DATA_DIR</param-name>
-        <param-value>/install/portal/geonode/geoserver/data</param-value>
+        <param-value>/home/vagrant/geonode/geoserver/data</param-value>
     </context-param> 
 
     

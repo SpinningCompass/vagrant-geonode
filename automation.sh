@@ -11,16 +11,19 @@ USER=`whoami`
 
 # Where should the source code be installed. Important for development environment as we want to use our
 # preferred IDEs to edit code.
-INSTALL_DIR='/install/portal'
+INSTALL_DIR='/home/vagrant'
+
+GEONODEURL=$1
 
 # Prevent apt-get steps from displaying interactive prompts
 export DEBIAN_FRONTEND=noninteractive
 
+
 # Delete old INSTALL_DIR if present
-if [ -d $INSTALL_DIR ]; then
-  echo "Removing old geonode installation for fresh provisioning."
-  rm -rf $INSTALL_DIR
-fi
+# if [ -d $INSTALL_DIR ]; then
+#   echo "Removing old geonode installation for fresh provisioning."
+#   rm -rf $INSTALL_DIR
+# fi
 
 # Node.js setup
 sudo sh -c 'curl -sL https://deb.nodesource.com/setup | bash -'
@@ -88,8 +91,8 @@ if [ ! -d "/opt/geogig" ]; then
   cd ~
   wget "http://iweb.dl.sourceforge.net/project/geogig/geogig-1.0-beta1/geogig-cli-app-1.0-beta1.zip"
   sudo unzip geogig-cli-app-1.0-beta1.zip -d /opt/geogig
-  /opt/geogig/bin/geogig config --global user.name "vagrant"
-  /opt/geogig/bin/geogig config --global user.email "vagrant@localhost"
+  /opt/geogig/geogig/bin/geogig config --global user.name "vagrant"
+  /opt/geogig/geogig/bin/geogig config --global user.email "vagrant@localhost"
 fi
 
 cd $INSTALL_DIR
@@ -132,7 +135,7 @@ echo "source /usr/local/bin/virtualenvwrapper.sh" >> ~/.bashrc
 echo "export PIP_DOWNLOAD_CACHE=$HOME/.pip-downloads" >> ~/.bashrc
 echo "export INSTALL_DIR=$INSTALL_DIR" >> ~/.bashrc
 echo "export INSTALL_DIR=$INSTALL_DIR" >> ~/.bashrc
-echo "export PATH=/opt/geogig/bin:$PATH" >> ~/.bashrc
+echo "export PATH=/opt/geogig/geogig/bin:$PATH" >> ~/.bashrc
 
 # Sourcing these from the BASHRC was not working in the script. Explicitly,
 # setting these from the BASHRC for immediate usage.
@@ -215,6 +218,10 @@ sudo chown -R $USER ~/.npm/
 sed -e "s/) + GEONODE_APPS/'maploom',\n'geonode.contrib.geogig',\n) + GEONODE_APPS/" < geonode/geonode/settings.py > geonode/geonode/settings2.py
 mv geonode/geonode/settings2.py geonode/geonode/settings.py
 
+sed "s/geonode.vag/$GEONODEURL/g" /install/local_settings.py > $INSTALL_DIR/geonode/geonode/local_settings.py
+
+
+
 # Add the maploom_urls to the list of urlpatterns in urls.py
 # Also, make the snapmapapp_urls first sequentially in the urlpatterns list
 echo "from maploom.geonode.urls import urlpatterns as maploom_urls
@@ -232,6 +239,11 @@ python manage.py createsuperuser --username=admin --email=ad@m.in --noinput
 python manage.py collectstatic --noinput
 
 
+cp /install/web.xml $INSTALL_DIR/geonode/geoserver/geoserver/WEB-INF/web.xml
+#cp /install/geoserver/config.xml /install/portal/geonode/geoserver/data/security/auth/geonodeAuthProvider/config.xml
+sed "s/geonode.vag/$GEONODEURL/g" /install/config.xml > $INSTALL_DIR/geonode/geoserver/geoserver/data/security/auth/geonodeAuthProvider/config.xml
+
+
 sudo cp -R /install/supervisor-app.conf /etc/supervisor/conf.d/supervisor-app.conf
 sudo service supervisor start
 
@@ -239,12 +251,13 @@ sudo service supervisor start
 
 sudo a2enmod proxy
 sudo a2enmod proxy_http
-sudo cp /install/apache/geonode.conf /etc/apache2/sites-available/geonode.conf
+sudo sed "s/geonode.vag/$GEONODEURL/g" /install/geonode.conf > /tmp/geonode.conf
+sudo mv /tmp/geonode.conf /etc/apache2/sites-available/geonode.conf 
+#sudo cp /install/apache/geonode.conf /etc/apache2/sites-available/geonode.conf
 sudo a2ensite geonode
+sudo a2dissite 000-default
 sudo service apache2 restart
 
-cp /install/geoserver/web.xml /install/portal/geonode/geoserver/geoserver/WEB-INF/web.xml
-cp /install/geoserver/config.xml /install/portal/geonode/geoserver/data/security/auth/geonodeAuthProvider/config.xml
 
 echo
 echo "A new admin user account has been created but requires a password to be used on the website."
